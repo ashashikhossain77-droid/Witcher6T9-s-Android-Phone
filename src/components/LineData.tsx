@@ -24,7 +24,9 @@ import {
   ArrowUpRight,
   Percent,
   Timer,
-  Target
+  Target,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { LineEntry, StyleNature, SMVWeight, LearningCurveDayRecord, BalancingLossAnalysis } from '../types';
 import { calculateLineMetrics } from '../utils';
@@ -59,6 +61,37 @@ export const LineData: React.FC<LineDataProps> = ({
   const [formData, setFormData] = useState<LineEntry>(() => initializeLineData(currentLine));
   const [saveToast, setSaveToast] = useState(false);
   const [showProgressionModal, setShowProgressionModal] = useState(false);
+
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    planning: true,
+    manpower: true,
+    top5: true,
+    bottleneck: true,
+    timeStudy: true,
+    learningCurve: true
+  });
+
+  const toggleSection = (key: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const isAllExpanded = Object.values(expandedSections).every(Boolean);
+
+  const toggleAllSections = () => {
+    const nextState = !isAllExpanded;
+    setExpandedSections({
+      planning: nextState,
+      manpower: nextState,
+      top5: nextState,
+      bottleneck: nextState,
+      timeStudy: nextState,
+      learningCurve: nextState
+    });
+  };
 
   // Sync draft when selected line changes
   useEffect(() => {
@@ -346,469 +379,41 @@ export const LineData: React.FC<LineDataProps> = ({
 
       {/* Main Form */}
       <form onSubmit={handleSave} className="space-y-4">
-        {/* ================= PRIMARY IE STANDARDS, BALANCING & PROGRESSION SUITE ================= */}
-        {/* Governing Standards from Ref: Image 2, Image 3 & Image 4 */}
-        <div className="rounded-2xl border-2 border-[#176f78]/30 bg-[#fbfaf6] overflow-hidden shadow-xs space-y-5 p-5">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#e7e1d5]">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-[#176f78] text-white shadow-xs">
-                <Target className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="font-display text-base sm:text-lg font-bold uppercase text-[#17343a]">
-                  IE Standards, Balancing Loss &amp; Style Progression Analysis
-                </h2>
-                <p className="text-xs text-[#527078]">
-                  Factory IE benchmark execution targets, takt balancing, and 6-day ramp-up progression (Ref: Images 2, 3 &amp; 4)
-                </p>
-              </div>
+        {/* Section Navigation & Expand/Collapse Master Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white border border-[#d9d2c2] shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-[#eef7f7] text-[#176f78]">
+              <Layers className="w-4 h-4" />
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs px-2.5 py-1 rounded-full font-bold font-mono-numbers ${
-                ba.balancingStatus === 'Stable'
-                  ? 'bg-[#e6f4ea] text-[#137333]'
-                  : ba.balancingStatus === 'Critical'
-                  ? 'bg-rose-100 text-rose-700'
-                  : 'bg-amber-100 text-amber-800'
-              }`}>
-                {ba.balancingStatus} • Loss {ba.balancingLossPct}%
+            <div>
+              <span className="text-xs font-bold text-[#17343a] uppercase tracking-wide">
+                Line Telemetry Logging Sections
               </span>
-              <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-[#dceceb] text-[#176f78] font-bold">
-                Day {lc.currentDay} of 6 • Target {getProgressionTargetEff(lc.currentDay, lc.styleNature, smvWeight)}%
+              <span className="text-[11px] text-[#527078] ml-2">
+                ({Object.values(expandedSections).filter(Boolean).length} of 6 Open)
               </span>
             </div>
           </div>
 
-          {/* 1. Debonair Ltd. Unit - 02 Balancing & Estimated Loss Analysis (Ref: Image 3 Standard) */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-display text-sm font-bold uppercase text-[#17343a]">
-                  Debonair Ltd. Unit - 02 Balancing &amp; Estimated Loss Analysis
-                </h3>
-                <p className="text-[11px] text-[#527078]">
-                  Takt, total operators, maximum cycle time &amp; hourly production capacity
-                </p>
-              </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#f1eee6] text-[#527078] uppercase">
-                Ref: Image 3 Standard
-              </span>
-            </div>
-
-            {/* Table representation matching Image 3 */}
-            <div className="overflow-x-auto border border-[#d9d2c2] rounded-xl bg-white shadow-xs">
-              <table className="w-full text-center text-xs border-collapse">
-                <thead className="bg-[#f1eee6] border-b border-[#d9d2c2] text-[11px] font-bold text-[#17343a]">
-                  <tr>
-                    <th className="p-2 border-r border-[#e7e1d5]">Line</th>
-                    <th className="p-2 border-r border-[#e7e1d5]">Buyer</th>
-                    <th className="p-2 border-r border-[#e7e1d5]">Running Style</th>
-                    <th className="p-2 border-r border-[#e7e1d5] bg-[#fff2e0]">TACCT (ΣT)s</th>
-                    <th className="p-2 border-r border-[#e7e1d5] bg-[#fff2e0]">TTL OPTR (N)</th>
-                    <th className="p-2 border-r border-[#e7e1d5] bg-[#fff2e0]">Max CT (CTmax)</th>
-                    <th className="p-2 border-r border-[#e7e1d5] bg-[#fff8e8]">Balancing Loss %</th>
-                    <th className="p-2 border-r border-[#e7e1d5] bg-[#fff8e8]">Balancing Status</th>
-                    <th className="p-2 border-r border-[#e7e1d5]">Potential</th>
-                    <th className="p-2 border-r border-[#e7e1d5]">Estimate</th>
-                    <th className="p-2 border-r border-[#e7e1d5]">Min Cap</th>
-                    <th className="p-2 border-r border-[#e7e1d5]">Current Prdn</th>
-                    <th className="p-2">Est. Loss</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-[#fbfaf6]">
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-bold text-[#17343a]">{formData.lineNo}</td>
-                    <td className="p-2.5 border-r border-[#e7e1d5]">{formData.buyer}</td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-medium">{formData.style}</td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-mono-numbers bg-[#fff2e0]/40 font-bold">
-                      {ba.tacctSeconds}s
-                    </td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-mono-numbers bg-[#fff2e0]/40">
-                      {ba.totalOperators}
-                    </td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-mono-numbers bg-[#fff2e0]/40 font-bold text-rose-600">
-                      {ba.maxCTSeconds}s
-                    </td>
-                    <td className={`p-2.5 border-r border-[#e7e1d5] font-mono-numbers font-bold bg-[#fff8e8]/40 ${
-                      ba.balancingLossPct < 0 ? 'text-amber-700' : ba.balancingLossPct > 25 ? 'text-rose-600' : 'text-emerald-700'
-                    }`}>
-                      {ba.balancingLossPct}%
-                    </td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] bg-[#fff8e8]/40">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                        ba.balancingStatus === 'Stable'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : ba.balancingStatus === 'Critical'
-                          ? 'bg-rose-100 text-rose-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {ba.balancingStatus}
-                      </span>
-                    </td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-mono-numbers font-bold text-[#176f78]">{ba.potentialPcsPerHour}</td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-mono-numbers">{ba.estimatePcsPerHour}</td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-mono-numbers text-[#527078]">{ba.minCapacityPcsPerHour}</td>
-                    <td className="p-2.5 border-r border-[#e7e1d5] font-mono-numbers font-bold text-[#17343a]">{ba.currentProductionPcsPerHour}</td>
-                    <td className={`p-2.5 font-mono-numbers font-bold ${
-                      ba.estimatedLossPct >= 0 ? 'text-emerald-700' : 'text-rose-600'
-                    }`}>
-                      {ba.estimatedLossPct}%
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Edit Engine Parameters */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 p-3 rounded-xl bg-white border border-[#e7e1d5]">
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-[#527078] mb-1">
-                  TACCT (ΣT) in Seconds
-                </label>
-                <input
-                  type="number"
-                  value={ba.tacctSeconds}
-                  onChange={e => handleBalancingParamChange('tacctSeconds', parseInt(e.target.value) || 0)}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-[#d9d2c2] font-mono-numbers font-bold"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-[#527078] mb-1">
-                  Max CT (CTmax) in Sec
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={ba.maxCTSeconds}
-                  onChange={e => handleBalancingParamChange('maxCTSeconds', parseFloat(e.target.value) || 0)}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-[#d9d2c2] font-mono-numbers font-bold text-rose-600"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-[#527078] mb-1">
-                  Current Hourly Output (Pcs/Hr)
-                </label>
-                <input
-                  type="number"
-                  value={ba.currentProductionPcsPerHour}
-                  onChange={e => handleBalancingParamChange('currentProductionPcsPerHour', parseInt(e.target.value) || 0)}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-[#d9d2c2] font-mono-numbers font-bold"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-[#527078] mb-1">
-                  Estimated Hourly Target (Pcs/Hr)
-                </label>
-                <input
-                  type="number"
-                  value={ba.estimatePcsPerHour}
-                  onChange={e => handleBalancingParamChange('estimatePcsPerHour', parseInt(e.target.value) || 0)}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-[#d9d2c2] font-mono-numbers"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 2. IE Balancing & Floor Execution Activity Targets (Ref: Image 2) */}
-          <div className="pt-3 border-t border-[#e7e1d5]">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-display text-xs font-bold uppercase text-[#17343a] flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>IE Balancing &amp; Floor Execution Activity Targets (Ref: Image 2)</span>
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3 rounded-xl bg-white border border-[#d9d2c2] flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] text-[#527078] font-bold uppercase">SEQ 01 • Theoretical Balance</div>
-                  <div className="font-display text-base font-bold text-[#17343a] font-mono-numbers">
-                    {ba.theoreticalBalancePct}%
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                  Target &gt; 95%
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white border border-[#d9d2c2] flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] text-[#527078] font-bold uppercase">SEQ 02 • Balancing Error</div>
-                  <div className="font-display text-base font-bold text-[#17343a] font-mono-numbers">
-                    {ba.balancingErrorPct}%
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                  Target &lt; 5%
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white border border-[#d9d2c2] flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] text-[#527078] font-bold uppercase">SEQ 03 • Capacity Estimate</div>
-                  <div className="font-display text-base font-bold text-[#17343a] font-mono-numbers">
-                    +{ba.capacityEstimatePct}%
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                  Target &gt; 10%
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white border border-[#d9d2c2] flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] text-[#527078] font-bold uppercase">SEQ 04.1 • Right Man in Process</div>
-                  <div className="text-xs font-bold text-emerald-700">100% Assigned</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({
-                    ...formData,
-                    balancingAnalysis: { ...ba, rightManInRightProcess: !ba.rightManInRightProcess }
-                  })}
-                  className={`px-2 py-1 rounded-md text-[10px] font-bold ${
-                    ba.rightManInRightProcess ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}
-                >
-                  {ba.rightManInRightProcess ? 'Verified' : 'Pending'}
-                </button>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white border border-[#d9d2c2] flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] text-[#527078] font-bold uppercase">SEQ 04.2 • Right Machine Setup</div>
-                  <div className="text-xs font-bold text-emerald-700">100% Configured</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({
-                    ...formData,
-                    balancingAnalysis: { ...ba, rightMachineForProcess: !ba.rightMachineForProcess }
-                  })}
-                  className={`px-2 py-1 rounded-md text-[10px] font-bold ${
-                    ba.rightMachineForProcess ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}
-                >
-                  {ba.rightMachineForProcess ? 'Verified' : 'Pending'}
-                </button>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white border border-[#d9d2c2] flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] text-[#527078] font-bold uppercase">SEQ 05 • Needle Downtime</div>
-                  <div className="font-display text-base font-bold text-[#17343a] font-mono-numbers">
-                    {ba.needleDowntimeMinutes} Min
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                  Target 18 Min
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. Garment Style Classification & 6-Day Period Rule Automatically looks up efficiency targets from the Style Progression Chart (Ref: Image 4) */}
-          <div className="pt-3 border-t border-[#e7e1d5] space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 className="font-display text-sm font-bold uppercase text-[#17343a]">
-                  Garment Style Classification &amp; 6-Day Period Rule
-                </h3>
-                <p className="text-[11px] text-[#527078]">
-                  Automatically looks up efficiency targets from the Style Progression Chart (Ref: Image 4)
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowProgressionModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-[#176f78] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:bg-[#125860] cursor-pointer self-start sm:self-auto"
-              >
-                <Calendar className="w-4 h-4" />
-                <span>View Full 40-Day Chart</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-              {/* Style Nature Selector */}
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-[#527078] mb-1">
-                  Style Nature
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleStyleNatureChange('new')}
-                    className={`p-2.5 rounded-xl text-center font-bold transition-all ${
-                      lc.styleNature === 'new'
-                        ? 'bg-[#176f78] text-white shadow-xs'
-                        : 'bg-[#f1eee6] text-[#527078] hover:bg-[#e7e1d5] border border-[#d9d2c2]'
-                    }`}
-                  >
-                    New Style
-                    <span className="block text-[10px] font-normal opacity-80">Initial Run</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleStyleNatureChange('repeat')}
-                    className={`p-2.5 rounded-xl text-center font-bold transition-all ${
-                      lc.styleNature === 'repeat'
-                        ? 'bg-[#8c531b] text-white shadow-xs'
-                        : 'bg-[#f1eee6] text-[#527078] hover:bg-[#e7e1d5] border border-[#d9d2c2]'
-                    }`}
-                  >
-                    Repeat Style
-                    <span className="block text-[10px] font-normal opacity-80">&le; 3 Months</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* SMV Weight Classification */}
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-[#527078] mb-1">
-                  SMV Weight Category
-                </label>
-                <div className="p-2.5 rounded-xl bg-[#f1eee6] border border-[#d9d2c2] flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-[#17343a] capitalize">{smvWeight} weight</div>
-                    <div className="text-[10px] text-[#527078]">
-                      {smvWeight === 'light' ? '0 - 30 Min' : smvWeight === 'medium' ? '31 - 60 Min' : '>61 Min'}
-                    </div>
-                  </div>
-                  <span className="px-2 py-1 rounded-md text-[11px] font-mono-numbers font-bold bg-white text-[#176f78] border border-[#d9d2c2]">
-                    {formData.smv} min SMV
-                  </span>
-                </div>
-              </div>
-
-              {/* Current Learning Curve Day */}
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-[#527078] mb-1">
-                  Current Period Day (1 to 6)
-                </label>
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5, 6].map(dayNum => (
-                    <button
-                      key={dayNum}
-                      type="button"
-                      onClick={() => handleUpdateLearningCurve({ currentDay: dayNum })}
-                      className={`flex-1 py-2 rounded-xl font-mono-numbers font-bold text-center transition-all ${
-                        lc.currentDay === dayNum
-                          ? 'bg-[#17343a] text-white shadow-xs ring-2 ring-[#176f78]'
-                          : 'bg-[#f1eee6] text-[#527078] hover:bg-[#e7e1d5] border border-[#d9d2c2]'
-                      }`}
-                    >
-                      D{dayNum}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Important Rule Banner from Image 4 */}
-            <div className="flex items-start gap-2 p-2.5 rounded-xl bg-[#fff8e8] border border-[#f5e0b0] text-[11px] text-[#8c531b]">
-              <Info className="w-4 h-4 shrink-0 mt-0.5" />
-              <div>
-                <strong>Standard Rule:</strong> If any style input starts again within 3 months in the same line, it is considered a <strong>Repeat Style</strong> (higher target curve on Days 1-5). Learning curve ramp-up period is standardized to <strong>6 days</strong> before reaching normal operations.
-              </div>
-            </div>
-
-            {/* 6-Day Period Progression Visual Comparison Bar Chart */}
-            <div className="p-4 rounded-2xl bg-white border border-[#d9d2c2] space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="font-display text-xs font-bold uppercase text-[#17343a] flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-[#176f78]" />
-                  <span>6-Day Learning Curve Progression (Planned vs Achieved Efficiency)</span>
-                </h4>
-                <div className="flex items-center gap-3 text-[11px]">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-xs bg-[#176f78]" />
-                    <span className="text-[#527078]">Planned Target</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-xs bg-emerald-500" />
-                    <span className="text-[#527078]">Achieved Output</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bar Grid for the 6 Days */}
-              <div className="grid grid-cols-6 gap-2 pt-2 border-t border-[#e7e1d5]">
-                {lc.history.slice(0, 6).map((item) => {
-                  const isCurrent = lc.currentDay === item.day;
-                  const maxPercent = 75; // scale height up to 75%
-                  const plannedHeight = Math.min(100, (item.plannedEff / maxPercent) * 100);
-                  const achievedHeight = Math.min(100, ((item.achievedEff || 0) / maxPercent) * 100);
-
-                  return (
-                    <div
-                      key={item.day}
-                      className={`p-2.5 rounded-xl border flex flex-col items-center justify-between transition-all ${
-                        isCurrent
-                          ? 'bg-[#eef7f7] border-[#176f78] shadow-xs'
-                          : 'bg-[#fbfaf6] border-[#d9d2c2]'
-                      }`}
-                    >
-                      <div className="text-center w-full">
-                        <span className={`text-[10px] font-bold block ${
-                          isCurrent ? 'text-[#176f78]' : 'text-[#527078]'
-                        }`}>
-                          Day {item.day}
-                        </span>
-                        {isCurrent && (
-                          <span className="px-1 py-0.2 rounded text-[8px] font-bold bg-[#176f78] text-white uppercase inline-block">
-                            Active
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Dual Bar Display */}
-                      <div className="w-full h-24 flex items-end justify-center gap-1.5 py-1">
-                        {/* Planned Bar */}
-                        <div
-                          style={{ height: `${plannedHeight}%` }}
-                          className="w-3.5 sm:w-4 bg-[#176f78] rounded-t-sm transition-all relative group cursor-pointer"
-                          title={`Planned: ${item.plannedEff}%`}
-                        />
-                        {/* Achieved Bar */}
-                        <div
-                          style={{ height: `${achievedHeight}%` }}
-                          className={`w-3.5 sm:w-4 rounded-t-sm transition-all cursor-pointer ${
-                            item.achievedEff >= item.plannedEff
-                              ? 'bg-emerald-500'
-                              : item.achievedEff > 0
-                              ? 'bg-amber-500'
-                              : 'bg-slate-200'
-                          }`}
-                          title={`Achieved: ${item.achievedEff}%`}
-                        />
-                      </div>
-
-                      {/* Efficiency Labels */}
-                      <div className="text-center text-[10px] font-mono-numbers">
-                        <span className="text-[#176f78] font-bold block">{item.plannedEff}%</span>
-                        <span className={`${
-                          item.achievedEff >= item.plannedEff
-                            ? 'text-emerald-700 font-bold'
-                            : item.achievedEff > 0
-                            ? 'text-amber-700'
-                            : 'text-slate-400'
-                        }`}>
-                          {item.achievedEff > 0 ? `${item.achievedEff}%` : '—'}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleAllSections}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#d9d2c2] bg-[#fbfaf6] text-xs font-bold text-[#527078] hover:text-[#17343a] hover:bg-[#f1eee6] shadow-2xs transition-all cursor-pointer"
+            >
+              {isAllExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              <span>{isAllExpanded ? "Collapse All Sections" : "Expand All Sections"}</span>
+            </button>
           </div>
         </div>
 
         {/* ================= SECTION 1: Line Setup & IE Planning ================= */}
         <div className="rounded-2xl border border-[#d9d2c2] bg-[#fbfaf6] overflow-hidden shadow-xs">
-          <div className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left">
+          <button
+            type="button"
+            onClick={() => toggleSection("planning")}
+            className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left hover:bg-[#fbfaf6] transition-colors cursor-pointer"
+          >
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-[#eef7f7] text-[#176f78] border border-[#c4e5e5]">
                 <Layers className="w-5 h-5" />
@@ -822,12 +427,20 @@ export const LineData: React.FC<LineDataProps> = ({
                 </p>
               </div>
             </div>
-            <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-[#f1eee6] text-[#527078] font-bold">
-              SMV {formData.smv}m • {smvWeight}
-            </span>
-          </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-[#f1eee6] text-[#527078] font-bold">
+                SMV {formData.smv}m • {smvWeight}
+              </span>
+              {expandedSections.planning ? (
+                <ChevronUp className="w-4 h-4 text-[#527078]" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-[#527078]" />
+              )}
+            </div>
+          </button>
 
-          <div className="p-5 space-y-4 text-xs">
+          {expandedSections.planning && (
+            <div className="p-5 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-[#527078] mb-1">
@@ -971,11 +584,16 @@ export const LineData: React.FC<LineDataProps> = ({
                 </div>
               </div>
             </div>
+          )}
         </div>
 
         {/* ================= SECTION 2: Manpower Allocation & Absenteeism Balancing ================= */}
         <div className="rounded-2xl border border-[#d9d2c2] bg-[#fbfaf6] overflow-hidden shadow-xs">
-          <div className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left">
+          <button
+            type="button"
+            onClick={() => toggleSection("manpower")}
+            className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left hover:bg-[#fbfaf6] transition-colors cursor-pointer"
+          >
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-[#fef7e0] text-[#b06000] border border-[#feefa3]">
                 <Users className="w-5 h-5" />
@@ -989,12 +607,20 @@ export const LineData: React.FC<LineDataProps> = ({
                 </p>
               </div>
             </div>
-            <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-[#fef7e0] text-[#8c4600] font-bold">
-              Present: {metrics.totalPresentMP} • Absent: {metrics.totalAbsentMP}
-            </span>
-          </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-[#fef7e0] text-[#8c4600] font-bold">
+                Present: {metrics.totalPresentMP} • Absent: {metrics.totalAbsentMP}
+              </span>
+              {expandedSections.manpower ? (
+                <ChevronUp className="w-4 h-4 text-[#527078]" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-[#527078]" />
+              )}
+            </div>
+          </button>
 
-          <div className="p-5 space-y-4 text-xs">
+          {expandedSections.manpower && (
+            <div className="p-5 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* Operator */}
                 <div className="p-3.5 rounded-xl bg-white border border-[#d9d2c2] space-y-2">
@@ -1180,11 +806,16 @@ export const LineData: React.FC<LineDataProps> = ({
                 </div>
               </div>
             </div>
+          )}
         </div>
 
         {/* ================= SECTION 3: Top 5 Meeting Monitoring ================= */}
         <div className="rounded-2xl border border-[#d9d2c2] bg-[#fbfaf6] overflow-hidden shadow-xs">
-          <div className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left">
+          <button
+            type="button"
+            onClick={() => toggleSection('top5')}
+            className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left hover:bg-[#fbfaf6] transition-colors cursor-pointer"
+          >
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-[#f3e8fd] text-[#7627bb] border border-[#e9d5ff]">
                 <CheckCircle2 className="w-5 h-5" />
@@ -1198,14 +829,22 @@ export const LineData: React.FC<LineDataProps> = ({
                 </p>
               </div>
             </div>
-            <span className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase ${
-              formData.top5.held === 'yes' ? 'bg-[#f3e8fd] text-[#7627bb]' : 'bg-rose-100 text-rose-700'
-            }`}>
-              Status: {formData.top5.held.toUpperCase()}
-            </span>
-          </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase ${
+                formData.top5.held === 'yes' ? 'bg-[#f3e8fd] text-[#7627bb]' : 'bg-rose-100 text-rose-700'
+              }`}>
+                Status: {formData.top5.held.toUpperCase()}
+              </span>
+              {expandedSections.top5 ? (
+                <ChevronUp className="w-4 h-4 text-[#527078]" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-[#527078]" />
+              )}
+            </div>
+          </button>
 
-          <div className="p-5 space-y-4 text-xs">
+          {expandedSections.top5 && (
+            <div className="p-5 space-y-4 text-xs">
               <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-xl bg-white border border-[#d9d2c2]">
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-[#17343a] uppercase">Meeting Conducted?</span>
@@ -1298,11 +937,16 @@ export const LineData: React.FC<LineDataProps> = ({
                 />
               </div>
             </div>
+          )}
         </div>
 
         {/* ================= SECTION 4: Bottleneck Flow Analysis & Cycle Time Checking ================= */}
         <div className="rounded-2xl border border-[#d9d2c2] bg-[#fbfaf6] overflow-hidden shadow-xs">
-          <div className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left">
+          <button
+            type="button"
+            onClick={() => toggleSection('bottleneck')}
+            className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left hover:bg-[#fbfaf6] transition-colors cursor-pointer"
+          >
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200">
                 <AlertTriangle className="w-5 h-5" />
@@ -1316,12 +960,20 @@ export const LineData: React.FC<LineDataProps> = ({
                 </p>
               </div>
             </div>
-            <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 font-bold">
-              {formData.bottleneck.station || 'Critical'} • {formData.bottleneck.cycleTime}s
-            </span>
-          </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 font-bold">
+                {formData.bottleneck.station || 'Critical'} • {formData.bottleneck.cycleTime}s
+              </span>
+              {expandedSections.bottleneck ? (
+                <ChevronUp className="w-4 h-4 text-[#527078]" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-[#527078]" />
+              )}
+            </div>
+          </button>
 
-          <div className="p-5 space-y-4 text-xs">
+          {expandedSections.bottleneck && (
+            <div className="p-5 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="sm:col-span-2">
                   <label className="block text-[11px] font-bold uppercase text-[#527078] mb-1">
@@ -1400,11 +1052,16 @@ export const LineData: React.FC<LineDataProps> = ({
                 />
               </div>
             </div>
+          )}
         </div>
 
         {/* ================= SECTION 5: Time / Production Study ================= */}
         <div className="rounded-2xl border border-[#d9d2c2] bg-[#fbfaf6] overflow-hidden shadow-xs">
-          <div className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left">
+          <button
+            type="button"
+            onClick={() => toggleSection("timeStudy")}
+            className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left hover:bg-[#fbfaf6] transition-colors cursor-pointer"
+          >
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-[#e0f2fe] text-[#0369a1] border border-[#bae6fd]">
                 <Clock className="w-5 h-5" />
@@ -1418,12 +1075,20 @@ export const LineData: React.FC<LineDataProps> = ({
                 </p>
               </div>
             </div>
-            <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-[#e0f2fe] text-[#0369a1] font-bold">
-              Study: {formData.timeStudy.done.toUpperCase()} • {formData.timeStudy.observedRate} pcs/h
-            </span>
-          </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono-numbers px-2.5 py-1 rounded-full bg-[#e0f2fe] text-[#0369a1] font-bold">
+                Study: {formData.timeStudy.done.toUpperCase()} • {formData.timeStudy.observedRate} pcs/h
+              </span>
+              {expandedSections.timeStudy ? (
+                <ChevronUp className="w-4 h-4 text-[#527078]" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-[#527078]" />
+              )}
+            </div>
+          </button>
 
-          <div className="p-5 space-y-4 text-xs">
+          {expandedSections.timeStudy && (
+            <div className="p-5 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-[#527078] mb-1">
@@ -1524,16 +1189,21 @@ export const LineData: React.FC<LineDataProps> = ({
                 />
               </div>
             </div>
+          )}
         </div>
 
         {/* ================= SECTION 6: Line Build-Up & 6-Day Learning Curve Telemetry Logging ================= */}
         <div className="rounded-2xl border border-[#d9d2c2] bg-[#fbfaf6] overflow-hidden shadow-xs">
           <div className="w-full p-4 flex items-center justify-between bg-white border-b border-[#e7e1d5] text-left">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-[#176f78] text-white shadow-xs">
+              <button
+                type="button"
+                onClick={() => toggleSection("learningCurve")}
+                className="p-2.5 rounded-xl bg-[#176f78] text-white shadow-xs hover:bg-[#125860] cursor-pointer"
+              >
                 <TrendingUp className="w-5 h-5" />
-              </div>
-              <div>
+              </button>
+              <div onClick={() => toggleSection("learningCurve")} className="cursor-pointer">
                 <div className="flex items-center gap-2">
                   <h2 className="font-display text-base sm:text-lg font-bold uppercase text-[#17343a]">
                     Line Build-Up &amp; 6-Day Learning Curve Telemetry Logging
@@ -1559,10 +1229,22 @@ export const LineData: React.FC<LineDataProps> = ({
                 <Calendar className="w-3.5 h-3.5" />
                 <span>40-Day Chart</span>
               </button>
+              <button
+                type="button"
+                onClick={() => toggleSection("learningCurve")}
+                className="p-1 rounded-lg text-[#527078] hover:bg-[#f1eee6] cursor-pointer ml-1"
+              >
+                {expandedSections.learningCurve ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
             </div>
           </div>
 
-          <div className="p-5 space-y-4 text-xs">
+          {expandedSections.learningCurve && (
+            <div className="p-5 space-y-4 text-xs">
               {/* Style Nature & Weight Configuration Banner */}
               <div className="p-4 rounded-2xl bg-white border border-[#d9d2c2] space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1835,6 +1517,7 @@ export const LineData: React.FC<LineDataProps> = ({
                 </table>
               </div>
             </div>
+          )}
         </div>
 
         {/* General Remarks & Save Actions */}

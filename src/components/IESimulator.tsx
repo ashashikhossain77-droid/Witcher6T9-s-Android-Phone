@@ -31,7 +31,10 @@ import {
   Percent,
   Copy,
   ExternalLink,
-  ChevronDown
+  ChevronDown,
+  ChevronUp,
+  Target,
+  Calendar
 } from 'lucide-react';
 import {
   LineEntry,
@@ -70,6 +73,7 @@ interface IESimulatorProps {
 
 type SimulatorSubTab =
   | 'target-efficiency'
+  | 'standards-balancing'
   | 'line-handoff'
   | 'production-flow'
   | 'manpower-balancing'
